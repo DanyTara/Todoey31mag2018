@@ -12,10 +12,18 @@ class TodoListViewController: UITableViewController {
     
     
     var itemArray = ["Pippo", "Peperino", "Topolino"]
+    
+    // aggiungo una scatola persistente (un .plist in UserDefauls) dove saranno depositati i miei dati in modo  persistenti
+    let defaults = UserDefaults.standard
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+       
+        // mostro a video il mio array richiamando i dati della mia scatola tramite la chiave asssegnata - faccio il downcast in String (il mio dato di partenza nel mio array) perché essendo un array all'interno di defaults può contenere qualsiasi tipo di dato. Uso if let perché se fosse vuoto l'app-crash
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+            itemArray = items
+        }
     }
 
     //MARK - Tableview Datasource Methods
@@ -64,8 +72,10 @@ class TodoListViewController: UITableViewController {
         //creo l'azione che  verrà innescata quando l'utente preme l'alert
         let action = UIAlertAction(title: "Aggiungi giocatore", style: .default) { (action) in
             // aggiungo il nuovo giocatore al mio array principale
-            //ricarico la tableview altrimenti non vedrò il nuovo giocatore
             self.itemArray.append(textfield.text!)
+            //aggiungo gli elementi del mio array nella scatola persistente
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            //ricarico la tableview altrimenti non vedrò il nuovo giocatore
             self.tableView.reloadData()
         }
         //aggiungo un campo di testo all'alert
