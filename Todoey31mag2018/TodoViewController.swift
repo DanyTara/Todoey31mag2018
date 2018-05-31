@@ -11,7 +11,7 @@ import UIKit
 class TodoListViewController: UITableViewController {
     
     
-    let itemArray = ["Pippo", "Peperino", "Topolino"]
+    var itemArray = ["Pippo", "Peperino", "Topolino"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,6 +51,36 @@ class TodoListViewController: UITableViewController {
         //per evitare di vedere il grigio nelle righe
         tableView.deselectRow(at: indexPath, animated: true)
     }
-
+    
+    //MARK - Aggiungi Nuovi Elementi
+    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        //creo una variabile locale che sarà raggiungibile da tutta l'azione per metterci il testo che scriverà l'utente
+        var textfield = UITextField()
+        
+        //creo un Alert con i messaggi prestampati
+        let alert = UIAlertController(title: "Aggiungi un nuovo giocatore", message: "", preferredStyle: .alert)
+        //creo l'azione che  verrà innescata quando l'utente preme l'alert
+        let action = UIAlertAction(title: "Aggiungi giocatore", style: .default) { (action) in
+            // aggiungo il nuovo giocatore al mio array principale
+            //ricarico la tableview altrimenti non vedrò il nuovo giocatore
+            self.itemArray.append(textfield.text!)
+            self.tableView.reloadData()
+        }
+        //aggiungo un campo di testo all'alert
+        alert.addTextField { (alertTextField) in
+            //creo un placeholder all'alert con un testo prestampato
+            alertTextField.placeholder = "Scrivi nuovo giocatore"
+            //metto nella variabile locale raggiungibile da tutta la func il nuuovo campo di testo che altrimenti sarebbe raggiungibile solo all'interno di queste graffe
+            textfield = alertTextField
+        }
+        //collego l'azione creata all'Alert
+        alert.addAction(action)
+        //questo permette all'alert di chiudersi
+        present(alert, animated: true, completion: nil)
+        
+    }
+    
 }
 
