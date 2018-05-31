@@ -10,20 +10,32 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    
-    var itemArray = ["Pippo", "Peperino", "Topolino"]
-    
     // aggiungo una scatola persistente (un .plist in UserDefauls) dove saranno depositati i miei dati in modo  persistenti
     let defaults = UserDefaults.standard
     
-
+    var itemArray = [Item]()
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
        
-        // mostro a video il mio array richiamando i dati della mia scatola tramite la chiave asssegnata - faccio il downcast in String (il mio dato di partenza nel mio array) perché essendo un array all'interno di defaults può contenere qualsiasi tipo di dato. Uso if let perché se fosse vuoto l'app-crash
-        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+        
+        let nuovoGiocatore = Item()
+        nuovoGiocatore.title = "Pippo"
+        itemArray.append(nuovoGiocatore)
+        
+        let nuovoGiocatore1 = Item()
+        nuovoGiocatore1.title = "Paperino"
+        itemArray.append(nuovoGiocatore1)
+        
+        let nuovoGiocatore2 = Item()
+        nuovoGiocatore2.title = "Gastone"
+        itemArray.append(nuovoGiocatore2)
+        
+        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
             itemArray = items
         }
+        
     }
 
     //MARK - Tableview Datasource Methods
@@ -33,12 +45,21 @@ class TodoListViewController: UITableViewController {
         return itemArray.count
     }
 
+    
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-    
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
+        
+        cell.textLabel?.text = item.title
+        
+        //Ternary operator ==>
+        //value = condition ? valueIFtrue :(altrimenti) valueIFfalse
+        cell.accessoryType = item.done ? .checkmark : .none
+        
         
         return cell
     }
@@ -46,16 +67,11 @@ class TodoListViewController: UITableViewController {
     //MARK - TableView Delegate Methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+         //nel DIDSELECT scelgo la riga e metto se vero o falso - essendo un booleano con soli due stati con '!' diventa opposto
         
-        if let cell = tableView.cellForRow(at: indexPath) {
-            if cell.accessoryType == .checkmark
-            {
-                cell.accessoryType = .none
-            } else {
-                cell.accessoryType = .checkmark
-            }
-        }
-        
+     // erroreee??? la devo mettere??? item[indexPath.row].done = !item[indexPath.row].false
+       
+    
         //per evitare di vedere il grigio nelle righe
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -71,8 +87,11 @@ class TodoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Aggiungi un nuovo giocatore", message: "", preferredStyle: .alert)
         //creo l'azione che  verrà innescata quando l'utente preme l'alert
         let action = UIAlertAction(title: "Aggiungi giocatore", style: .default) { (action) in
+            
+            let newItem = Item()
+            newItem.title = textfield.text!
             // aggiungo il nuovo giocatore al mio array principale
-            self.itemArray.append(textfield.text!)
+            self.itemArray.append(newItem)
             //aggiungo gli elementi del mio array nella scatola persistente
             self.defaults.set(self.itemArray, forKey: "TodoListArray")
             //ricarico la tableview altrimenti non vedrò il nuovo giocatore
