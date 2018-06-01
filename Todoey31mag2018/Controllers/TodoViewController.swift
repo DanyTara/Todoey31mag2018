@@ -10,31 +10,20 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    // aggiungo una scatola persistente (un .plist in UserDefauls) dove saranno depositati i miei dati in modo  persistenti
-    let defaults = UserDefaults.standard
+    
     
     var itemArray = [Item]()
+    
+    //creo la costante con il percorso per raggiungere il mio plist
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
        
+
         
-        let nuovoGiocatore = Item()
-        nuovoGiocatore.title = "Pippo"
-        itemArray.append(nuovoGiocatore)
-        
-        let nuovoGiocatore1 = Item()
-        nuovoGiocatore1.title = "Paperino"
-        itemArray.append(nuovoGiocatore1)
-        
-        let nuovoGiocatore2 = Item()
-        nuovoGiocatore2.title = "Gastone"
-        itemArray.append(nuovoGiocatore2)
-        
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-            itemArray = items
-        }
+       loadItems()
         
     }
 
@@ -69,7 +58,10 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
          //nel DIDSELECT scelgo la riga e metto se vero o falso - essendo un booleano con soli due stati con '!' diventa opposto
         
-     // erroreee??? la devo mettere??? item[indexPath.row].done = !item[indexPath.row].false
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
+        
+        saveItems()
+    
        
     
         //per evitare di vedere il grigio nelle righe
@@ -92,10 +84,10 @@ class TodoListViewController: UITableViewController {
             newItem.title = textfield.text!
             // aggiungo il nuovo giocatore al mio array principale
             self.itemArray.append(newItem)
-            //aggiungo gli elementi del mio array nella scatola persistente
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
-            //ricarico la tableview altrimenti non vedrò il nuovo giocatore
-            self.tableView.reloadData()
+            
+            self.saveItems()
+            
+    
         }
         //aggiungo un campo di testo all'alert
         alert.addTextField { (alertTextField) in
@@ -109,6 +101,37 @@ class TodoListViewController: UITableViewController {
         //questo permette all'alert di chiudersi
         present(alert, animated: true, completion: nil)
         
+        saveItems()
+    }
+    
+    //MARK - Model Manipulation Methods
+    
+    func saveItems() {
+        //creo il plist e aggiungo gli elementi del mio array nella scatola persistente
+        // PropertyListENCODER: un oggetto che codifica le istanze dei tipi di dati in un elenco di proprietà
+        //encode: metodo che restituisce un elenco di proprietà che rappresenta una versione codificata del valore fornito.Se si verifica un problema con la codifica del valore fornito, questo metodo genera un errore in base al tipo di problema
+        
+        let encoder = PropertyListEncoder()
+        
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding item array, \(error)")
+        }
+        self.tableView.reloadData()
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!){
+            let decoder = PropertyListDecoder()
+            do{
+            itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding item array, \(error)")
+            }
+            
+        }
     }
     
 }
